@@ -1,1 +1,1 @@
-from core.mixins.logger_mixin import LoggerMixin
+from .mixins.logger_mixin import LoggerMixin
