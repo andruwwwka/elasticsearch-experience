@@ -25,7 +25,9 @@ class Flat(models.Model):
     balcony_type = models.CharField(
         'Тип балкона',
         max_length=30,
-        choices=((value, value) for value in Constants.BALCONY_TYPES)
+        choices=((value, value) for value in Constants.BALCONY_TYPES),
+        blank=True,
+        null=True
     )
     hypothec = models.BooleanField(
         'Ипотека',
