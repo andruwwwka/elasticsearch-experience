@@ -10,3 +10,11 @@ DATABASES = {
             'PORT': '5433',
         }
 }
+
+
+# Run develop elastic docker run -p 9300:9200 elasticsearch:6.4.2
+ELASTIC_CONNECTION = dict(
+    hosts=["localhost:9300"]
+)
+
+ELASTIC_INDEX = "main_index"

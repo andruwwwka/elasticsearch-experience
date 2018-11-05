@@ -5,6 +5,10 @@ from core.constants import Constants
 
 
 class Flat(models.Model):
+    """
+    Модель для хранения информации о квартирах
+    """
+
     room_count = models.CharField(
         'Комнатность',
         max_length=15,

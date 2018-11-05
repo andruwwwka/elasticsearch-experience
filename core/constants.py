@@ -1,4 +1,8 @@
 class Constants(object):
+    """
+    Описание все используемых в проекте констант
+    """
+
     BALCONY_BALCONY_TYPE = 'balcony'
     LOGGIA_BALCONY_TYPE = 'loggia'
     BALCONY_AND_LOGGIA_BALCONY_TYPE = 'balcony_and_loggia'

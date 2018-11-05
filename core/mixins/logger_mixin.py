@@ -2,6 +2,9 @@ import logging
 
 
 class LoggerMixin(object):
+    """
+    Миксин для получения логгеров по классам
+    """
 
     @property
     def logger(self):

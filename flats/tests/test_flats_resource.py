@@ -7,6 +7,10 @@ from flats.models import Flat
 
 class TestResources(TestCase):
 
+    """
+    Тесты ресурсов приложения квартир
+    """
+
     @classmethod
     def setUpTestData(cls):
         super(TestResources, cls).setUpTestData()
@@ -36,6 +40,10 @@ class TestResources(TestCase):
         )
 
     def test_resource_update_unavailable(self):
+
+        """
+        Тест невозможности обновления данных о квартире через клиентский ресурс
+        """
         flat = Flat.objects.last()
         response = self.client.put(
             reverse("flats-detail", args=(flat.id,))
@@ -43,12 +51,18 @@ class TestResources(TestCase):
         self.assertEqual(response.status_code, 405)
 
     def test_resource_create_unavailable(self):
+        """
+        Тест недоступности создания объекта квартиры через клиентский ресурс
+        """
         response = self.client.post(
             reverse("flats-list")
         )
         self.assertEqual(response.status_code, 405)
 
     def test_resource_delete_unavailable(self):
+        """
+        Тест недоступности удаления объекта квартиры через клиентский ресурс
+        """
         flat = Flat.objects.last()
         response = self.client.delete(
             reverse("flats-detail", args=(flat.id,))
@@ -56,6 +70,9 @@ class TestResources(TestCase):
         self.assertEqual(response.status_code, 405)
 
     def test_resource_detail(self):
+        """
+        Тест получения данных об отдельном объекте квартиры
+        """
         flat = Flat.objects.last()
         response = self.client.get(
             reverse("flats-detail", args=(flat.id,))
@@ -64,6 +81,9 @@ class TestResources(TestCase):
         self.assertTrue(all([getattr(flat, key) == value for key, value in response.data.items()]))
 
     def test_resource_list(self):
+        """
+        Тест получения списка квартир
+        """
         response = self.client.get(
             reverse("flats-list")
         )
