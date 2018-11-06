@@ -1,3 +1,5 @@
+from multiprocessing.pool import ThreadPool
+
 from django.conf import settings
 from elasticsearch import client
 
@@ -24,7 +26,7 @@ class ElasticRepository(LoggerMixin):
         self.index = settings.ELASTIC_INDEX
         self._mapping = None
 
-    def create(self):
+    def _create(self):
         try:
             self.connection.indices.create(
                 self.index,
@@ -50,14 +52,73 @@ class ElasticRepository(LoggerMixin):
         except Exception:
             self.logger.warning('Индекс {} уже существует!'.format(self.index))
 
-    def recreate(self):
-        self.logger.info('Пересоздание индекса {}'.format(self.index))
-
+    def _drop(self):
         try:
             self.connection.indices.delete(
-                self.index
+                index=self.index
             )
         except Exception as e:
             self.logger.warning('Невозможно удалить индекс: {} ({})'.format(self.index, e))
 
-        self.create()
+    def recreate(self):
+        self.logger.info('Пересоздание индекса {}'.format(self.index))
+        self._drop()
+        self._create()
+
+    def _index_dict(self, elastic_model):
+        self.connection.index(
+            index=self.index,
+            doc_type=self.doc_type,
+            id=elastic_model.get_id(),
+            body=elastic_model.to_dict()
+        )
+
+    def reindex_one(self, item):
+        try:
+            elastic_model = self.model.from_item(item, )
+            self._index_dict(elastic_model)
+        except Exception:
+            self.logger.exception('Невозможно реиндексировать элемент %s', item)
+
+    def reindex_items(self, items):
+        try:
+            pool = ThreadPool(50)
+            pool.map(
+                self.reindex_one,
+                items
+            )
+            pool.terminate()
+        except Exception:
+            self.logger.exception('Невозможно индексировать элементы')
+
+    def delete_index(self, items):
+        qs = list(items)
+
+        pool = ThreadPool(10)
+
+        def _worker(item):
+            try:
+                self.connection.delete(
+                    index=self.index,
+                    doc_type=self.doc_type,
+                    id=item.id
+                )
+            except Exception:
+                self.logger.exception(
+                    'Невозможно удаление элемента',
+                    id=item.id,
+                    index=self.index,
+                    doc_type=self.doc_type
+                )
+
+        pool.map(_worker, qs)
+        pool.terminate()
+
+    def _get_mapping(self):
+        if self._mapping is None:
+            self._mapping = self.connection.indices.get_mapping(
+                index=self.index,
+                doc_type=self.doc_type
+            ).get(self.index, {}).get("mappings", {}).get(self.doc_type, {}).get("properties", {})
+
+        return self._mapping
