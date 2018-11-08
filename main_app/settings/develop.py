@@ -12,7 +12,7 @@ DATABASES = {
 }
 
 
-# Run develop elastic docker run -p 9300:9200 elasticsearch:6.4.2
+# Run develop elastic docker run -p 9300:9200 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.4.3
 ELASTIC_CONNECTION = dict(
     hosts=["localhost:9300"]
 )

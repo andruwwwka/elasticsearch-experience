@@ -4,6 +4,7 @@ from rest_framework.viewsets import GenericViewSet
 from core.elastic_adapter.mixins import ElasticFilterMixin
 from core.elastic_adapter.model import SerializerElasticModel
 from core.elastic_adapter.repository import ElasticRepository
+from core.elastic_adapter.signals import SignalHandler
 from flats.models import Flat
 
 
