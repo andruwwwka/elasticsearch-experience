@@ -41,3 +41,10 @@ class FlatListViewSet(GenericViewSet,
 
     serializer_class = FlatSerializer
     queryset = Flat.objects.all()
+
+
+SignalHandler.initial_index(
+    flat_repository, Flat.objects.all()
+).register(
+    Flat, flat_repository
+)
