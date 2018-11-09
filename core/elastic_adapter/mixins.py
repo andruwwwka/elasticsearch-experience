@@ -9,12 +9,12 @@ class ElasticFilterMixin(object):
     Предоставление ресурсу DRF методов работы с моделью эластика
     """
 
-    controller = SimpleController
+    controller = None
 
     es_filters = None
 
     @list_route(methods=['GET'])
     def filters(self, request):
         return Response(
-            self.controller.get_filters(self.es_filters, request.query_params, request=request)
+            self.controller.get_filters(self.es_filters, request.query_params)
         )

@@ -8,5 +8,5 @@ class SimpleController(object):
     def __init__(self, repository):
         self.repository = repository
 
-    def get_filters(self, fields, query_params, request=None):
-        pass
+    def get_filters(self, fields, query_params):
+        return self.repository.get_filters(fields, query_params)

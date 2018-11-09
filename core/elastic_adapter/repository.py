@@ -1,3 +1,4 @@
+import json
 from multiprocessing.pool import ThreadPool
 
 from django.conf import settings
@@ -119,6 +120,62 @@ class ElasticRepository(LoggerMixin):
             self._mapping = self.connection.indices.get_mapping(
                 index=self.index,
                 doc_type=self.doc_type
-            ).get(self.index, {}).get("mappings", {}).get(self.doc_type, {}).get("properties", {})
+            ).get(self.index, {}).get('mappings', {}).get(self.doc_type, {}).get('properties', {})
 
         return self._mapping
+
+    def _parse_query_items(self, filters):
+        out = {
+            "bool": {
+                "must": []
+            }
+        }
+
+        for key, value in filters.iteritems():
+            if key.replace("__in", "") in self._get_mapping():
+                if key.endswith("__in"):
+                    out["bool"]["must"].append({
+                        "terms": {
+                            key.replace("__in", ""): value
+                        }
+                    })
+                else:
+                    out["bool"]["must"].append({
+                        "term": {
+                            key: value
+                        }
+                    })
+
+        return out
+
+    def _build_aggregation_items(self, fields):
+        return fields
+
+    def get_filters(self, fields, filters):
+        body = {
+            'size': 0,
+            'query': self._parse_query_items(filters),
+            'aggs': self._build_aggregation_items(fields)
+        }
+
+        self.logger.info(
+            'Запрос к эластику', body=json.dumps(body, indent=4),
+            doc_type=self.doc_type,
+            index=self.index
+        )
+
+        response = self.connection.search(
+            index=self.index,
+            doc_type=self.doc_type,
+            body=body
+        )
+
+        out = {}
+
+        for key, data in response.get('aggregations', {}).iteritems():
+            out[key] = sorted([
+                item['key']
+                for item in data['buckets']
+            ])
+
+        return out
