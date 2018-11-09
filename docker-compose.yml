@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.3
+    environment:
+      discovery.type: single-node
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: elastic_db
+
+  web:
+    build: ./
+    command: sh ./docker-entrypoint.sh elastic 9200 db 5432
+    ports:
+    - 8000:8000
+    depends_on:
+    - db
+    environment:
+      DJANGO_SETTINGS_MODULE: main_app.settings.production
