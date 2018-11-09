@@ -1,8 +1,6 @@
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 
-from core.elastic_adapter.controllers import SimpleController
-
 
 class ElasticFilterMixin(object):
     """

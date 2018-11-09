@@ -131,7 +131,7 @@ class ElasticRepository(LoggerMixin):
             }
         }
 
-        for key, value in filters.iteritems():
+        for key, value in filters.items():
             if key.replace("__in", "") in self._get_mapping():
                 if key.endswith("__in"):
                     out["bool"]["must"].append({
@@ -149,7 +149,17 @@ class ElasticRepository(LoggerMixin):
         return out
 
     def _build_aggregation_items(self, fields):
-        return fields
+        out = {}
+        for key in fields:
+            if key in self._get_mapping():
+                out[key] = {
+                    "terms": {
+                        "field": key,
+                        "size": 10000
+                    }
+                }
+
+        return out
 
     def get_filters(self, fields, filters):
         body = {
@@ -159,9 +169,11 @@ class ElasticRepository(LoggerMixin):
         }
 
         self.logger.info(
-            'Запрос к эластику', body=json.dumps(body, indent=4),
-            doc_type=self.doc_type,
-            index=self.index
+            'Запрос к эластику: index={index}; doc_type={doc_type}; body={body}'.format(
+                body=json.dumps(body, indent=4),
+                doc_type=self.doc_type,
+                index=self.index
+            )
         )
 
         response = self.connection.search(
