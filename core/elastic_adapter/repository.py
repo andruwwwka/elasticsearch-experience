@@ -67,6 +67,7 @@ class ElasticRepository(LoggerMixin):
         self._create()
 
     def _index_dict(self, elastic_model):
+        self.logger.info('Индексируется элемент: {}'.format(elastic_model.to_dict()))
         self.connection.index(
             index=self.index,
             doc_type=self.doc_type,
@@ -165,7 +166,7 @@ class ElasticRepository(LoggerMixin):
         body = {
             'size': 0,
             'query': self._parse_query_items(filters),
-            'aggs': self._build_aggregation_items(fields)
+            # 'aggs': self._build_aggregation_items(fields)
         }
 
         self.logger.info(
@@ -182,9 +183,11 @@ class ElasticRepository(LoggerMixin):
             body=body
         )
 
+        self.logger.info('Ответ от эластика: {}'.format(response))
+
         out = {}
 
-        for key, data in response.get('aggregations', {}).iteritems():
+        for key, data in response.get('aggregations', {}).items():
             out[key] = sorted([
                 item['key']
                 for item in data['buckets']
